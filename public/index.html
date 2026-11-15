@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Factory Forge - 2D Gyárépítő Játék</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-title">
+        <span>🏭</span> FACTORY FORGE
+      </div>
+      <div id="saveBadge" class="save-badge">
+        <span>●</span> Felhőbe mentve
+      </div>
+    </div>
+
+    <!-- STATS HUD -->
+    <div class="stats-bar">
+      <div class="stat-pill">
+        <span class="stat-label">Egyenleg:</span>
+        <span id="hudBalance" class="stat-value money">$500</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Profit Ráta:</span>
+        <span id="hudProfitRate" class="stat-value rate">$0.0/s</span>
+      </div>
+    </div>
+
+    <!-- USER & ACTIONS -->
+    <div class="user-controls">
+      <div class="stat-pill">
+        <span class="stat-label">Játékos:</span>
+        <strong id="hudUsername" style="color: #93c5fd;">Vendég</strong>
+      </div>
+      <button id="btnSave" class="btn-secondary" title="Gyár mentése a szerverre (S billentyű)">
+        💾 Mentés
+      </button>
+      <button id="btnLogout" class="btn-secondary" title="Kijelentkezés">
+        🚪 Kilépés
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN APP WORKSPACE -->
+  <main class="app-main">
+    
+    <!-- LEFT TOOLBAR -->
+    <aside class="toolbar-sidebar">
+      <div class="section-title">Eszköztár (Gyorsbillentyűk: 1-6)</div>
+      <div class="tool-grid">
+        <button class="tool-btn active" data-tool="inspect">
+          <div class="tool-info">
+            <span class="tool-icon">🔍</span>
+            <span>Kijelölés</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-dim);">[1]</span>
+        </button>
+
+        <button class="tool-btn" data-tool="miner">
+          <div class="tool-info">
+            <span class="tool-icon">⛏️</span>
+            <span>Bányász</span>
+          </div>
+          <span class="tool-cost">$100</span>
+        </button>
+
+        <button class="tool-btn" data-tool="conveyor">
+          <div class="tool-info">
+            <span class="tool-icon">➡️</span>
+            <span>Futószalag</span>
+          </div>
+          <span class="tool-cost">$10</span>
+        </button>
+
+        <button class="tool-btn" data-tool="crafter">
+          <div class="tool-info">
+            <span class="tool-icon">⚙️</span>
+            <span>Készítő</span>
+          </div>
+          <span class="tool-cost">$250</span>
+        </button>
+
+        <button class="tool-btn" data-tool="seller">
+          <div class="tool-info">
+            <span class="tool-icon">💰</span>
+            <span>Eladó</span>
+          </div>
+          <span class="tool-cost">$150</span>
+        </button>
+
+        <button class="tool-btn" data-tool="demolish">
+          <div class="tool-info">
+            <span class="tool-icon">🗑️</span>
+            <span>Lebontás</span>
+          </div>
+          <span style="font-size: 0.75rem; color: #f87171;">70% ár</span>
+        </button>
+      </div>
+
+      <!-- DIRECTION WIDGET -->
+      <div class="options-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="section-title" style="margin-bottom: 0;">Irány ([R] forgatás)</span>
+        </div>
+        <div class="direction-picker">
+          <button class="dir-btn" data-dir="up" title="Észak (Fel)">⬆️</button>
+          <button class="dir-btn active" data-dir="right" title="Kelet (Jobbra)">➡️</button>
+          <button class="dir-btn" data-dir="down" title="Dél (Le)">⬇️</button>
+          <button class="dir-btn" data-dir="left" title="Nyugat (Balra)">⬅️</button>
+        </div>
+      </div>
+
+      <!-- MINER RESOURCE SELECT -->
+      <div id="resourceOptionBox" class="options-box" style="display: none;">
+        <span class="section-title">Bányászott érc</span>
+        <select id="resourceSelect" class="app-select">
+          <option value="iron_ore">Vasérc ($10)</option>
+          <option value="copper_ore">Rézérc ($12)</option>
+        </select>
+      </div>
+
+      <!-- CRAFTER RECIPE SELECT -->
+      <div id="recipeOptionBox" class="options-box" style="display: none;">
+        <span class="section-title">Gyártási recept</span>
+        <select id="recipeSelect" class="app-select">
+          <option value="iron_gear">Vas fogaskerék (2 Vasérc ➔ $30)</option>
+          <option value="copper_wire">Rézhuzal (2 Rézérc ➔ $32)</option>
+          <option value="circuit">Áramkör (1 Fogaskerék + 1 Huzal ➔ $95)</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- CENTER CANVAS -->
+    <section class="canvas-container">
+      <canvas id="gameCanvas" width="576" height="576"></canvas>
+    </section>
+
+    <!-- RIGHT INSPECTOR -->
+    <aside class="inspector-sidebar">
+      <div class="section-title">Gép Ellenőrző (Inspector)</div>
+      <div id="inspectorCard" class="inspector-card">
+        <p style="color: var(--text-dim); font-size: 0.9rem;">
+          Válassz ki egy gépet a rácson a szint, belső tároló és fejlesztési lehetőségek megtekintéséhez.
+        </p>
+      </div>
+
+      <!-- RECIPE GUIDE -->
+      <div class="inspector-card">
+        <div class="section-title" style="margin-bottom: 4px;">Recept fa & Értékek</div>
+        <div style="font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px; color: var(--text-muted);">
+          <div>⛏️ <strong>Vasérc</strong>: $10 | <strong>Rézérc</strong>: $12</div>
+          <div>⚙️ <strong>Fogaskerék</strong>: 2x Vasérc ➔ <span style="color: #34d399;">$30</span> (+50% profit)</div>
+          <div>🔌 <strong>Rézhuzal</strong>: 2x Rézérc ➔ <span style="color: #34d399;">$32</span> (+33% profit)</div>
+          <div>💡 <strong>Áramkör</strong>: 1x Fogaskerék + 1x Huzal ➔ <span style="color: #34d399;">$95</span> (+53% profit)</div>
+        </div>
+      </div>
+
+      <!-- SHORTCUTS GUIDE -->
+      <div class="inspector-card">
+        <div class="section-title" style="margin-bottom: 4px;">Gyorsbillentyűk</div>
+        <div style="font-size: 0.8rem; display: flex; flex-direction: column; gap: 4px; color: var(--text-dim);">
+          <div><kbd style="background: var(--bg-secondary); padding: 2px 5px; border-radius: 4px;">1-6</kbd> : Eszközök váltása</div>
+          <div><kbd style="background: var(--bg-secondary); padding: 2px 5px; border-radius: 4px;">R</kbd> : Építés irányának forgatása</div>
+          <div><kbd style="background: var(--bg-secondary); padding: 2px 5px; border-radius: 4px;">S</kbd> : Mentés szerverre</div>
+          <div><kbd style="background: var(--bg-secondary); padding: 2px 5px; border-radius: 4px;">Esc</kbd> : Kijelölés megszüntetése</div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- AUTH MODAL -->
+  <div id="authModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="tab-header">
+        <button id="tabLogin" class="tab-btn active">Bejelentkezés</button>
+        <button id="tabRegister" class="tab-btn">Regisztráció</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="formLogin" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label>Felhasználónév</label>
+          <input type="text" id="loginUsername" class="form-input" placeholder="pl. bence_factory" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>Jelszó</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top: 8px;">Belépés a gyárba</button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="formRegister" style="display: none; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label>Válassz felhasználónevet</label>
+          <input type="text" id="regUsername" class="form-input" placeholder="min. 3 karakter" required>
+        </div>
+        <div class="form-group">
+          <label>Jelszó</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="min. 4 karakter" required>
+        </div>
+        <button type="submit" class="btn-success" style="margin-top: 8px;">Fiók létrehozása ($500 kezdőtőke)</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button id="btnGuest" type="button" class="btn-secondary" style="font-size: 0.85rem; width: 100%;">
+          ⚡ Gyors indítás (Automatikus vendég fiók)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFLINE PROFIT MODAL -->
+  <div id="offlineModalOverlay" class="modal-overlay">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 4px;">🎉</div>
+      <div class="modal-title">Üdvözlünk újra a Factory Forge-ban!</div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Amíg távol voltál, a gyárad folyamatosan termelt:
+      </p>
+
+      <div style="background: var(--bg-card); padding: 16px; border-radius: 8px; margin: 8px 0; border: 1px solid var(--border-bright);">
+        <div style="font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase;">Megtermelt offline profit:</div>
+        <div id="offlineProfitAmount" style="font-size: 2rem; font-weight: 800; color: #34d399; margin: 4px 0;">+$0</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+          Eltelt szerveridő: <strong id="offlineTimeText" style="color: var(--text-main);">0 óra</strong>
+        </div>
+        <div id="offlineCappedNotice" style="font-size: 0.75rem; color: #f59e0b; margin-top: 6px; display: none;">
+          ⚠️ Az offline termelés maximálva lett 24 órában a játékszabályoknak megfelelően.
+        </div>
+      </div>
+
+      <button id="btnClaimOffline" class="btn-success" style="font-size: 1rem; padding: 10px 20px;">
+        💰 Profit jóváírása az egyenleghez
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- MAIN SCRIPT -->
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# .cursorrules - Factory Forge Project Rules for AI Assistants
+
+You are working on Factory Forge, a 2D grid-based factory builder game built with a client-server architecture.
+
+Guidelines:
+- Stack: Node.js 22+ (using native node:http, node:sqlite, node:test, node:crypto) on the backend; HTML5 Canvas + Vanilla modern ES modules on the frontend.
+- Zero external npm dependencies: Do NOT introduce external npm packages unless strictly instructed.
+- All simulation logic in `src/simulation.js` must be deterministic and pure.
+- Backpressure & congestion: Conveyors hold max 1 item. When downstream is blocked, upstream machines pause production without losing or duplicating items.
+- Offline profit limit: Always capped at 24 hours (86,400 seconds) calculated on the server side using server timestamps.
+- Testing: All automated tests live in `tests/` and run using `node --test tests/*.test.js`.
+- Always follow the acceptance criteria defined in `spec.md` and agent definitions in `AGENTS.md`.
