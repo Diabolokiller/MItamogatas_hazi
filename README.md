@@ -1,10 +1,8 @@
 # Factory Forge - Házi Feladat Dokumentáció
 
 **Tárgy:** Szoftverfejlesztés MI támogatással  
-**Készítette:** Bálint  
+**Készítette:** Vajda Bálint  
 **Projekt:** Factory Forge (2D rács-alapú gyárépítő és nyersanyag-menedzsment játék)  
-**Specifikáció:** [spec.md](file:///C:/Users/balint/Suli/5/vibe/spec.md)  
-**Követelmények:** [Hazi_feladat_kovetelmenyek.pdf](file:///C:/Users/balint/Suli/5/vibe/Hazi_feladat_kovetelmenyek.pdf)  
 
 ---
 
