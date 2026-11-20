@@ -4,3 +4,5 @@ data/*.db-journal
 data/*.db-wal
 .DS_Store
 Thumbs.db
+spec.md
+Hazi_feladat_kovetelmenyek.pdf
